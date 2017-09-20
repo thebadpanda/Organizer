@@ -14,6 +14,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,56 +25,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 public class MainActivity extends Activity {
 
-    //EditText et;
+    final ArrayList<String> notes = new ArrayList<>();
 
-    //ListView lvMain;
+    Button saveBtn = (Button) findViewById(R.id.saveBtn);
 
-    //SharedPreferences prefs;
+    ListView lvMain = (ListView) findViewById(R.id.lvMain);
 
-    ArrayList<String> notes;
+    final EditText et = (EditText) findViewById(R.id.et);
 
-    int index = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences prefs = getSharedPreferences("sPref", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("counter", notes.size());
-        if(notes.size() > 0){
-            for(int i =0; i<notes.size(); i++){
-                editor.putString("value_", notes.get(i));
-            }
-            editor.commit();
-        }
-
-
-        ListView lvMain = (ListView)findViewById(R.id.lvMain);
-
-        final EditText et = (EditText)findViewById(R.id.et);
-
-        final ArrayList<String> notes = new ArrayList<>();
-
         final ArrayAdapter<String> adapter;
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, notes );
-
-        lvMain.setAdapter(adapter);
-
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, notes);
 
         et.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View view, int keyCode, KeyEvent event) {
-                if(event.getAction()==KeyEvent.ACTION_DOWN)
-                    if(keyCode == KeyEvent.KEYCODE_ENTER){
-                        if(et.getText().toString().matches(".*[a-zA-Zа-яА-Я0-9].*")){
+                if (event.getAction() == KeyEvent.ACTION_DOWN)
+                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                        if (et.getText().toString().matches(".*[a-zA-Zа-яА-Я0-9].*")) {
                             notes.add(et.getText().toString());
                             adapter.notifyDataSetChanged();
                             //adapter.add(et.getText().toString());
                             et.setText("");
-                            index++;
                             return true;
                         }
 
@@ -83,6 +63,25 @@ public class MainActivity extends Activity {
             }
         });
 
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences prefs = getSharedPreferences("sPref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt("counter", notes.size());
+                if (notes.size() > 0) {
+                    for (int i = 0; i < notes.size(); i++) {
+                        editor.putString("value_" + i, notes.get(i));
+                    }
+                    editor.commit();
+                }
+
+            }
+
+        });
+
+        lvMain.setAdapter(adapter);
+
         lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View itemClicked, int position, long id) {
@@ -90,38 +89,45 @@ public class MainActivity extends Activity {
             }
         });
 
-        lvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+        lvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterLongView, View itemLongClicked, final int position, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(itemLongClicked.getContext());
                 builder.setMessage("Delete this note?")
-                        .setPositiveButton("Yes", new AlertDialog.OnClickListener(){
-                            public void onClick(DialogInterface dialog, int id){
-                               // adapter.remove(notes.get(id));
+                        .setPositiveButton("Yes", new AlertDialog.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // adapter.remove(notes.get(id));
                                 notes.remove(position);
                                 adapter.notifyDataSetChanged();
                             }
-                }).setNegativeButton("No", null);
+                        }).setNegativeButton("No", null);
 
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
 
 
-
-                Toast.makeText(getApplicationContext(), "Видалено: " + ((TextView)itemLongClicked).getText(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Видалено: " + ((TextView) itemLongClicked).getText(), Toast.LENGTH_SHORT).show();
 
                 return false;
             }
 
-
         });
-
+    }
+    void saveNotes() {
+        SharedPreferences prefs = getSharedPreferences("sPref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("counter", notes.size());
+        if (notes.size() > 0) {
+            for (int i = 0; i < notes.size(); i++) {
+                editor.putString("value_" + i, notes.get(i));
+            }
+            editor.commit();
         }
-
+    }
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
+        saveNotes();
 
     }
-
 }
