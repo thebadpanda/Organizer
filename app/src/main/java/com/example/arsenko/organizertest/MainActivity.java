@@ -20,21 +20,47 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
-    final ArrayList<String> notes = new ArrayList<>();
+    ArrayList<String> notes;
 
-    Button saveBtn = (Button) findViewById(R.id.saveBtn);
+    Button saveBtn;
 
-    ListView lvMain = (ListView) findViewById(R.id.lvMain);
+    ListView lvMain;
 
-    final EditText et = (EditText) findViewById(R.id.et);
+    EditText et;
 
-    final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_checked, notes);
+    ArrayAdapter<String> adapter;
+
+    SharedPreferences.Editor editor;
+
+    SharedPreferences prefs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        saveBtn = (Button) findViewById(R.id.saveBtn);
+
+        lvMain = (ListView) findViewById(R.id.lvMain) ;
+
+        et = (EditText) findViewById(R.id.et);
+
+        notes = new ArrayList<>();
+
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_checked, notes);
+
+        prefs = getSharedPreferences("sPref", MODE_PRIVATE);
+
+        if(prefs.getInt("counter", 0) >0) {
+            for(int i=0; i<prefs.getInt("counter",0); i++){
+             String myValue = prefs.getString("value_" + i, "");
+                notes.add(myValue);
+            }
+
+        }else{
+            System.out.println("Список пустий");
+        }
+        adapter.notifyDataSetChanged();
 
         et.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View view, int keyCode, KeyEvent event) {
@@ -57,7 +83,7 @@ public class MainActivity extends Activity {
         lvMain.setAdapter(adapter);
 
 
-        saveBtn.setOnClickListener(new AdapterView.OnClickListener() {
+        saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 saveNotes();
@@ -99,14 +125,15 @@ public class MainActivity extends Activity {
     }
     void saveNotes() {
         SharedPreferences prefs = getSharedPreferences("sPref", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
+        editor = prefs.edit();
         editor.putInt("counter", notes.size());
         if (notes.size() > 0) {
             for (int i = 0; i < notes.size(); i++) {
                 editor.putString("value_" + i, notes.get(i));
             }
-            editor.apply();
         }
+        editor.apply();
+
     }
     @Override
     public void onPause() {
