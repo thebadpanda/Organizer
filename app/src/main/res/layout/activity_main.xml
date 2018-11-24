@@ -1,43 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.example.arsenko.organizertest.MainActivity"
-    android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/tvTop"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Тут ти можеш залишити свої нотатки...">
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        tools:context="com.organizer.MainActivity">
 
-    </TextView>
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/et"
-        android:layout_below="@+id/tvTop" >
+        <EditText
+            android:id="@+id/et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:hint="@string/add_item"
+            android:textAllCaps="false" />
 
-    </EditText>
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lvMain"
-        android:layout_below="@+id/et"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:choiceMode="multipleChoice">
+        <ListView
+            android:id="@+id/lvMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/et"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="-1dp"
+            android:choiceMode="multipleChoice"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
 
-    </ListView>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/saveBtn"
-        android:layout_below="@+id/lvMain"
-        android:text="Save all"/>
-
-
-</RelativeLayout>
+        <Button
+            android:id="@+id/saveBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lvMain"
+            android:text="@string/save_all" />
+    </RelativeLayout>
+</layout>

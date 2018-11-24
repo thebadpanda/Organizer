@@ -1,4 +1,4 @@
-package com.example.arsenko.organizertest;
+package com.organizer.arsenko.organizer;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

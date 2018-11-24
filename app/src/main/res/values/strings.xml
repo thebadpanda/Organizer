@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">OrganizerTest</string>
+    <string name="app_name">Organizer</string>
+    <string name="add_item">Add item..</string>
+    <string name="save_all">Save all</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
