@@ -3,12 +3,15 @@ package com.organizer;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService.RemoteViewsFactory;
+
+import static com.organizer.WidgetProvider.ACTION_CHECK;
 
 public class WidgetDataProvider implements RemoteViewsFactory {
 
@@ -59,14 +62,16 @@ public class WidgetDataProvider implements RemoteViewsFactory {
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews mView = new RemoteViews(mContext.getPackageName(), R.layout.widget_item); //simple_list_item_1
-        mView.setTextViewText(R.id.tvItem, mCollections.get(position)); // text1
-        final Intent checkedIntent = new Intent();
-        checkedIntent.setAction(WidgetProvider.ACTION_CHECK);
-        final Bundle bundleCheck = new Bundle();
+        RemoteViews mView = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
+        mView.setTextViewText(R.id.tvItem, mCollections.get(position));
+        Intent checkedIntent = new Intent();
+        checkedIntent.setAction(ACTION_CHECK);
+        Bundle bundleCheck = new Bundle();
+        bundleCheck.putInt(WidgetProvider.EXTRA_INT, position);
         bundleCheck.putString(WidgetProvider.EXTRA_STRING, mCollections.get(position));
         checkedIntent.putExtras(bundleCheck);
         mView.setOnClickFillInIntent(R.id.checkBtn, checkedIntent);
+
         return mView;
     }
 
@@ -87,5 +92,4 @@ public class WidgetDataProvider implements RemoteViewsFactory {
     public void onDestroy() {
 
     }
-
 }
