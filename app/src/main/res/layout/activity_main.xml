@@ -1,42 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="#5d4cfc"
+    tools:context="com.organizer.MainActivity"
+    android:focusableInTouchMode="true">
+
 
     <RelativeLayout
+        android:id="@+id/addTaskLinearLyt"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="16dp"
-        tools:context="com.organizer.MainActivity">
+        android:weightSum="5">
 
-        <EditText
-            android:id="@+id/et"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:hint="@string/add_item"
-            android:textAllCaps="false"
-            android:layout_marginEnd="70dp"/>
-
-        <Button
-            android:id="@+id/addBtn"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/addTaskButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentEnd="true"
-            android:text="Add"
-            android:textAllCaps="false" />
+            android:elevation="10dp"
+            android:cropToPadding="false"
+            android:src="@mipmap/plus"
+            android:padding="2dp"
+            app:backgroundTint="@color/colorYellow" />
 
-        <ListView
-            android:id="@+id/lvMain"
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/et"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="-1dp"
-            android:choiceMode="multipleChoice"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="20dp"
+            android:layout_toStartOf="@id/addTaskButton"
+            android:gravity="center_vertical"
+            app:hintEnabled="false">
+
+            <EditText
+                android:id="@+id/addTaskEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="@color/colorPrimaryComplementAlpha"
+                android:hint="@string/add_new_task"
+                android:paddingStart="10dp"
+                android:textColor="@android:color/background_light"
+                android:textColorHint="#8effffff"
+                android:textSize="15sp" />
+        </android.support.design.widget.TextInputLayout>
     </RelativeLayout>
-</layout>
+
+    <TextView
+        android:id="@+id/headingText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/addTaskLinearLyt"
+        android:layout_marginTop="10dp"
+        android:fontFamily="serif-monospace"
+        android:gravity="center_horizontal"
+        android:text="Tasks:"
+        android:textColor="@color/colorPrimaryComplement"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <ListView
+        android:id="@+id/mainListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/headingText"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@color/colorPrimaryComplementAlpha">
+
+    </ListView>
+
+</RelativeLayout>

@@ -5,41 +5,33 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
-        <activity android:name=".MainActivity">
+        <activity android:name="com.organizer.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.organizer.TaskViewActivity" />
 
-        <receiver android:name="com.organizer.WidgetProvider" >
+        <receiver android:name="com.organizer.WidgetHandler">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.organizer.WidgetProvider.ACTION_CHECK"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_provider" />
-        </receiver>
-
-        <receiver android:name=".MainActivity$MyBroadcast"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.organizer.MainActivity.ACTIVITY_CHECK" />
-            </intent-filter>
+                android:resource="@xml/appwidget_info" />
         </receiver>
 
         <service
             android:name="com.organizer.WidgetService"
+            android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 

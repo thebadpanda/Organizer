@@ -1,155 +1,87 @@
 package com.organizer;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.databinding.DataBindingUtil;
-import android.support.v7.app.AlertDialog;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.AdapterView;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.organizer.databinding.ActivityMainBinding;
-
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends Activity {
-    private ArrayList<String> notes;
-    private ArrayAdapter<String> adapter;
-    private SharedPreferences.Editor editor;
-    private SharedPreferences prefs;
-    private ActivityMainBinding binding;
-    private BroadcastReceiver broadcastReceiver;
-    public static String ACTIVITY_CHECK = "com.organizer.MainActivity.ACTIVITY_CHECK";
-    public static final String POSITION = "POSITION";
+public class MainActivity extends AppCompatActivity {
+
+    private List<TaskItem> mainList = new ArrayList<>();
+    private ListView mainListView = null;
+    private ArrayAdapter ad = null;
+    private EditText addTaskEditText = null;
+    private FloatingActionButton addTaskButton = null;
+    private SQLiteDatabase sqlDB = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.organizer.R.layout.activity_main);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        notes = new ArrayList<>();
+        setContentView(R.layout.activity_main);
 
-//        broadcastReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                int position = intent.getIntExtra(POSITION, 0);
-//                binding.lvMain.performItemClick(binding.lvMain, position, binding.lvMain.getChildAt(position).getId());
-//            }
-//        };
-//        IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION);
-//        registerReceiver(broadcastReceiver, intentFilter);
+        sqlDB = DBHandle.createDBTables(this);
+        Cursor existingTasks = sqlDB.rawQuery("SELECT * FROM ToDoList", null);
+        if (existingTasks != null) {
+            if (existingTasks.moveToFirst()) {
+                do {
+                    if (existingTasks.isNull(existingTasks.getColumnIndex("DeadlineDate"))) {
+                        mainList.add(new TaskItem(existingTasks.getString(existingTasks.getColumnIndex("Task")), Boolean.valueOf(existingTasks.getString(existingTasks.getColumnIndex("Status"))), null));
 
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_checked, notes);//android.R.layout.simple_list_item_checked
-        prefs = getSharedPreferences("sPref", MODE_PRIVATE);
+                    } else {
+                        mainList.add(new TaskItem(existingTasks.getString(existingTasks.getColumnIndex("Task")), Boolean.valueOf(existingTasks.getString(existingTasks.getColumnIndex("Status"))), existingTasks.getString(existingTasks.getColumnIndex("DeadlineDate"))));
+                    }
 
-        if (prefs.getInt("counter", 0) > 0) {
-            for (int i = 0; i < prefs.getInt("counter", 0); i++) {
-                String myValue = prefs.getString("value_" + i, "");
-                notes.add(myValue);
+                } while (existingTasks.moveToNext());
             }
-        } else {
-            System.out.println("Список пустий");
         }
-        adapter.notifyDataSetChanged();
+        mainListView = findViewById(R.id.mainListView);
+        ad = new TaskAdapter((ArrayList) mainList, getApplicationContext(), sqlDB, getSupportFragmentManager());
 
-        binding.addBtn.setOnClickListener(v -> addNote());
+        if (mainListView != null) {
+            mainListView.setAdapter(ad);
+        }
 
-        binding.et.setOnKeyListener((view, keyCode, event) -> {
-            if (event.getAction() == KeyEvent.ACTION_DOWN)
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    addNote();
+        addTaskEditText = findViewById(R.id.addTaskEditText);
+        addTaskButton = findViewById(R.id.addTaskButton);
+
+        addTaskButton.setOnClickListener(v -> {
+            String enterField = addTaskEditText.getText().toString();
+            if (!enterField.equals("")) {
+                if (enterField.contains("'")){
+//                    enterField = enterField.replaceAll("'", "\''");
+                    enterField = DatabaseUtils.sqlEscapeString(enterField);
                 }
-            return false;
-        });
+                try {
+                    sqlDB.execSQL("INSERT INTO ToDoList VALUES('" + enterField.trim() + "','false',NULL)");
+                    mainList.add(new TaskItem(enterField.trim(), false, null));
+                    addTaskEditText.setText("");
+                    ad.notifyDataSetChanged();
 
+                    int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetHandler.class));
+                    Intent intent = new Intent(getApplicationContext(), WidgetHandler.class);
+                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+                    sendBroadcast(intent);
 
-
-        binding.lvMain.setAdapter(adapter);
-
-        binding.lvMain.setOnItemClickListener((adapterView, itemClicked, position, id) ->
-                Toast.makeText(getApplicationContext(), "Done:  " + ((TextView) itemClicked).getText(), Toast.LENGTH_SHORT).show());
-
-        binding.lvMain.setOnItemLongClickListener((adapterLongView, itemLongClicked, position, id) -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(itemLongClicked.getContext());
-            builder.setMessage("Delete this note?")
-                    .setPositiveButton("Yes", (dialog, id1) -> {
-                        notes.remove(position);
-                        adapter.notifyDataSetChanged();
-                    }).setNegativeButton("No", null);
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-            saveNotes();
-            return false;
-        });
-    }
-
-    private boolean addNote() {
-        if (binding.et.getText().toString().matches(".*[a-zA-Zа-яА-Я0-9].*")) {
-            notes.add(binding.et.getText().toString());
-            adapter.notifyDataSetChanged();
-            binding.et.setText("");
-            saveNotes();
-        }
-        return true;
-    }
-
-    void saveNotes() {
-        SharedPreferences prefs = getSharedPreferences("sPref", MODE_PRIVATE);
-        editor = prefs.edit();
-        editor.putInt("counter", notes.size());
-        if (notes.size() > 0) {
-            for (int i = 0; i < notes.size(); i++) {
-                editor.putString("value_" + i, notes.get(i));
+                } catch (SQLiteException e) {
+                    Toast.makeText(getApplicationContext(), e + "", Toast.LENGTH_SHORT).show();
+                    Log.e("SQLLite Error: ", e + "");
+                }
             }
-        }
-        editor.apply();
-        int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), WidgetProvider.class));
-
-        Intent intent = new Intent(getApplicationContext(), WidgetProvider.class);
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        sendBroadcast(intent);
-    }
-
-    public class MyBroadcast extends BroadcastReceiver {
-        public MyBroadcast() { }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int position = intent.getIntExtra(POSITION, 0);
-            binding.lvMain.performItemClick(binding.lvMain, position, binding.lvMain.getChildAt(position).getId());
-        }
-    }
-
-
-    @Override
-    protected void onStart() {
-//        registerReceiver(broadcastReceiver, intentFilter);
-        super.onStart();
-    }
-
-    @Override
-    public void onPause() {
-        adapter.notifyDataSetChanged();
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        adapter.notifyDataSetChanged();
-//        unregisterReceiver(broadcastReceiver);
-        super.onStop();
+        });
     }
 }

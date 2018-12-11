@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_gravity="start">
+
+    <Button
+        android:id="@+id/task_list_color"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10sp"
+        android:layout_marginRight="10sp"
+        android:clickable="false"
+        android:background="@color/colorPrimaryDarkComplementAlpha"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_weight="8"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:text="@string/pending_tasks"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+</LinearLayout>
+
+
